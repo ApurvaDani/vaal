@@ -162,7 +162,7 @@ class Solver:
                 print('Current task model loss: {:.4f}'.format(task_loss.item()))
                 print('Current vae model loss: {:.4f}'.format(total_vae_loss.item()))
                 print('Current discriminator model loss: {:.4f}'.format(dsc_loss.item()))
-                print('current epoch: {} Training Acc: {}'.format(iter_count*batch_size/l_size, acc))
+                print('current epoch: {} Training Acc: {}'.format(iter_count*self.args.batch_size/l_size, acc))
 
             
             best_model = copy.deepcopy(task_model)
