@@ -36,8 +36,9 @@ class Solver:
                     yield img
 
 
-    def train(self, querry_dataloader, val_dataloader, task_model, vae, discriminator, unlabeled_dataloader):
-        self.args.train_iterations = (self.args.num_images * self.args.train_epochs) // self.args.batch_size
+    def train(self, querry_dataloader, val_dataloader, task_model, vae, discriminator, unlabeled_dataloader, l_size):
+        self.args.train_iterations = (l_size * self.args.train_epochs) // self.args.batch_size
+        print('Total iterations:', self.args.train_iterations)
         lr_change = self.args.train_iterations // 4
         labeled_data = self.read_data(querry_dataloader)
         unlabeled_data = self.read_data(unlabeled_dataloader, labels=False)
@@ -58,9 +59,9 @@ class Solver:
         
         best_acc = 0
         for iter_count in range(self.args.train_iterations):
-            if iter_count is not 0 and iter_count % lr_change == 0:
-                for param in optim_task_model.param_groups:
-                    param['lr'] = param['lr'] / 10
+            # if iter_count is not 0 and iter_count % lr_change == 0:
+            #     for param in optim_task_model.param_groups:
+            #         param['lr'] = param['lr'] / 10
             labeled_imgs, labels = next(labeled_data)
             unlabeled_imgs = next(unlabeled_data)
 
@@ -146,26 +147,39 @@ class Solver:
 
                 
 
-            if iter_count % 100 == 0:
+            
+            acc = self.validate(task_model, querry_dataloader)
+            
+            if acc > 0.99:
+                print('current epoch: {} Training Acc: {}'.format(iter_count*self.args.batch_size/l_size, acc))
+                print('Training Accuracy reached above 99%')
+                best_model = copy.deepcopy(task_model)
+                break
+
+
+            if (iter_count*self.args.batch_size/l_size) % (50) == 0:
                 print('Current training iteration: {}'.format(iter_count))
                 print('Current task model loss: {:.4f}'.format(task_loss.item()))
                 print('Current vae model loss: {:.4f}'.format(total_vae_loss.item()))
                 print('Current discriminator model loss: {:.4f}'.format(dsc_loss.item()))
+                print('current epoch: {} Training Acc: {}'.format(iter_count*batch_size/l_size, acc))
 
-            if iter_count % 1000 == 0:
-                acc = self.validate(task_model, val_dataloader)
-                if acc > best_acc:
-                    best_acc = acc
-                    best_model = copy.deepcopy(task_model)
-                
-                print('current step: {} acc: {}'.format(iter_count, acc))
-                print('best acc: ', best_acc)
+            
+            best_model = copy.deepcopy(task_model)
+
+            # if iter_count % 1000 == 0:
+            #     acc = self.validate(task_model, val_dataloader)
+            #     if acc > best_acc:
+            #         best_acc = acc
+            #         best_model = copy.deepcopy(task_model)
+            
 
 
         if self.args.cuda:
             best_model = best_model.cuda()
 
         final_accuracy = self.test(best_model)
+
         return final_accuracy, vae, discriminator
 
 

@@ -1,6 +1,7 @@
 from torchvision import datasets, transforms
 from torch.utils.data import Dataset, DataLoader
 import torchvision
+from torchvision import transforms
 import numpy
 
 from utils import *
@@ -14,13 +15,21 @@ def imagenet_transformer():
                              std=[0.229, 0.224, 0.225])
     ])
 
+# def cifar10_transformer():
+#     return torchvision.transforms.Compose([
+#            torchvision.transforms.RandomHorizontalFlip(),
+#            torchvision.transforms.ToTensor(),
+#            transforms.Normalize(mean=[0.5, 0.5, 0.5,],
+#                                 std=[0.5, 0.5, 0.5]),
+#        ])
+
+
 def cifar10_transformer():
-    return torchvision.transforms.Compose([
-           torchvision.transforms.RandomHorizontalFlip(),
-           torchvision.transforms.ToTensor(),
-           transforms.Normalize(mean=[0.5, 0.5, 0.5,],
-                                std=[0.5, 0.5, 0.5]),
-       ])
+    return transforms.Compose([transforms.RandomCrop(32, padding=4), 
+                               transforms.RandomHorizontalFlip(), 
+                               transforms.ToTensor(), 
+                               transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+
 
 class CIFAR10(Dataset):
     def __init__(self, path):
