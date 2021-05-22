@@ -112,8 +112,8 @@ def main(args):
         unlabeled_dataloader = data.DataLoader(train_dataset, 
                 sampler=unlabeled_sampler, batch_size=args.batch_size, drop_last=False)
 
-        print('Labeled Data', current_indices)
-        print('Unlabeled Data', unlabeled_indices)
+        print('Labeled Data', len(current_indices))
+        print('Unlabeled Data', len(unlabeled_indices))
         # train the models on the current data
         acc, vae, discriminator = solver.train(querry_dataloader,
                                                val_dataloader,
