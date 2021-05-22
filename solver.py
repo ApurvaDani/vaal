@@ -150,7 +150,7 @@ class Solver:
             
             acc = self.validate(task_model, querry_dataloader)
             
-            if acc > 0.99:
+            if acc > 99:
                 print('current epoch: {} Training Acc: {}'.format(iter_count*self.args.batch_size/l_size, acc))
                 print('Training Accuracy reached above 99%')
                 best_model = copy.deepcopy(task_model)
